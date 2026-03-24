@@ -76,14 +76,13 @@ class Links extends \yii\db\ActiveRecord
     }
 
     public function checkAvailability($attribute, $params) {
-        error_log(print_r($attribute, true), 3, '/var/www/html/runtime/logs/roms.log');
-        error_log(print_r($params, true), 3, '/var/www/html/runtime/logs/roms.log');
+        Yii::info($params, 'user_actions');
 
-        
         $ch = curl_init($this->$attribute);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);

@@ -3,9 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use yii\filters\AccessControl;
 use yii\web\Controller;
-use yii\web\Response;
 use app\models\Links;
 
 class SiteController extends Controller
@@ -22,7 +20,7 @@ class SiteController extends Controller
 
         if (Yii::$app->request->isPjax) {
             if ($model->load(Yii::$app->request->post())) {
-                if ($model->validate(['url'])) {
+                if ($model->validate()) {
                     $existingLink = Links::findOne(['url' => $model->url]);
                     if ($existingLink) {
                         return $this->renderPartial('index', ['model' => $existingLink]);

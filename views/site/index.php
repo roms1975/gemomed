@@ -31,9 +31,13 @@ $fullUrl = $model->short_url ?: Yii::$app->request->hostInfo . '/' . $model->sho
             <?php
                 if ($model->short_url) {
                     //$qr = QrCode::png('http://localhost/cpFEZo');
+                    ob_start();
+                    QrCode::png($model->short_url);
+                    $imageRaw = ob_get_clean();
+                    $base64Image = 'data:image/png;base64,' . base64_encode($imageRaw);
                     echo '<div class="qr-code-block text-center">';
                     echo '<h4>Сканируйте QR-код:</h4>';
-                    //echo Html::img();
+                    echo Html::img($base64Image);
                     echo '</div>';
                 }
             ?>
