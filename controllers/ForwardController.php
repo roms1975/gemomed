@@ -18,16 +18,21 @@ class ForwardController extends Controller
     public function actionIndex($link)
     {
         $ip = Yii::$app->request->userIP;
-        $link = Links::findOne(['short_url' => \Yii::$app->request->getAbsoluteUrl()]);
+        //$url = \Yii::$app->request->getAbsoluteUrl();
+        $model = Links::findOne(['short_url' => $link]);
 
-        Yii::$app->db->createCommand()->upsert('stat', [
-            'link_id' => $link->id,
-            'ip' => $ip,
-            'count' => 1,
-        ], [
-            'count' => new \yii\db\Expression('count + 1'),
-        ], false)->execute();
+        $stat = Stat::findOne(['link_id' => $model->id, 'ip' => $ip]);
 
-        return $this->redirect($link->url);
+        if ($stat) {
+            $stat->updateCounters(['count' => 1]);
+        } else {
+            $stat = new Stat();
+            $stat->link_id = $model->id;
+            $stat->ip = $ip;
+            $stat->count = 1;
+            $stat->save();
+        }
+
+        return $this->redirect($model->url);
     }
 }

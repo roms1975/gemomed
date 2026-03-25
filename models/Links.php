@@ -13,8 +13,6 @@ use Yii;
  */
 class Links extends \yii\db\ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -52,27 +50,24 @@ class Links extends \yii\db\ActiveRecord
         ];
     }
 
-    public function beforeValidate()
-    {
-        if (parent::beforeValidate()) {
-            if (empty($this->short_url)) {
-                $this->short_url = $this->generateUniqueShortUrl();
-            }
-            return true;
-        }
-        return false;
-    }
-
     private function generateUniqueShortUrl($length = 6)
     {
-        $domain = Yii::$app->request->hostInfo;
-        $code = $domain .'/' . \Yii::$app->security->generateRandomString($length);
+        $code = \Yii::$app->security->generateRandomString($length);
 
         while (static::find()->where(['short_url' => $code])->exists()) {
-            $code = $domain .'/' . \Yii::$app->security->generateRandomString($length);
+            $code = \Yii::$app->security->generateRandomString($length);
         }
 
         return $code;
+    }
+
+    public function getFullShortUrl() {
+        if (empty($this->short_url))
+            return false;
+
+        $domain = Yii::$app->request->hostInfo;
+        $controller = Yii::$app->params['forwardController'];
+        return $domain .'/' . $controller . '/' . $this->short_url;
     }
 
     public function checkAvailability($attribute, $params) {
@@ -89,6 +84,10 @@ class Links extends \yii\db\ActiveRecord
 
         if ($httpCode < 200 || $httpCode >= 400) {
             $this->addError($attribute, 'Данный URL не доступен');
+        } else {
+            if (empty($this->short_url)) {
+                $this->short_url = $this->generateUniqueShortUrl();
+            }
         }
     }
 

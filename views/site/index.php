@@ -9,7 +9,10 @@ use dosamigos\qrcode\QrCode;
 /** @var yii\web\View $this */
 
 $this->title = 'Genomed test. Take url';
-$fullUrl = $model->short_url ?: Yii::$app->request->hostInfo . '/' . $model->short_url;
+//$fullUrl = $model->short_url ?: Yii::$app->request->hostInfo . '/' . $model->short_url;
+$domain = Yii::$app->request->hostInfo;
+$controller = Yii::$app->params['forwardController'];
+$fullUrl =  $domain . '/' . $controller . '/' . $model->short_url;
 ?>
 
 <?php Pjax::begin(['id' => 'links-pjax']); ?>
@@ -27,12 +30,15 @@ $fullUrl = $model->short_url ?: Yii::$app->request->hostInfo . '/' . $model->sho
         <div class="col-md-6">
             <?= Alert::widget() ?>
             <?= $form->field($model, 'url')->textInput(['maxlength' => true])->label('Выведите url') ?>
-            <?= $form->field($model, 'short_url')->textInput(['maxlength' => true, 'disabled' => true]) ?>
+            <?= $form->field($model, 'fullShortUrl')->textInput([
+                    'maxlength' => true,
+                    'disabled' => true,
+                    'value' => $model->getFullShortUrl()
+            ])->label('Короткая ссылка') ?>
             <?php
                 if ($model->short_url) {
-                    //$qr = QrCode::png('http://localhost/cpFEZo');
                     ob_start();
-                    QrCode::png($model->short_url);
+                    QrCode::png($model->getFullShortUrl());
                     $imageRaw = ob_get_clean();
                     $base64Image = 'data:image/png;base64,' . base64_encode($imageRaw);
                     echo '<div class="qr-code-block text-center">';
